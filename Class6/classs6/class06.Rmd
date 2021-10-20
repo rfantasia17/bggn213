@@ -1,0 +1,143 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+---
+title: 'Class6: R Functions'
+author: "R(PID:A59010419"
+date: "10/15/2021"
+output: html_document
+
+# Quick Rmarkdown Tutorial 
+
+
+We can Write text. **Style** or *style*
+
+student1 <- c(100, 100, 100, 100, 100, 100, 100, 90) 
+student2 <- c(100, NA, 90, 90, 90, 90, 97, 80)
+
+```{r}
+plot(1:10)
+```
+```{r}
+student1 <- c(100, 100, 100, 100, 100, 100, 100, 90) 
+student2 <- c(100, NA, 90, 90, 90, 90, 97, 80)
+student3 <- c(90, NA, NA, NA, NA, NA, NA, NA)
+
+```
+First I think we should Find if there is an NA and set it to 0 
+then find and keep the place in the array that arent the minimum (logical)
+
+```{r}
+student<-student1
+student[is.na(student)] = 0
+a=student[-which.min(student)]
+mean(a)
+
+```
+The is.na() function returns logical True if NA
+my intution is what we ended up doing as a class.
+```{r}
+studentp<-student2
+studentp[is.na(studentp)] = 0
+mean(studentp[-which.min(studentp)])
+```
+
+```{r}
+studentp<-student3
+studentp[is.na(studentp)] = 0
+mean(studentp[-which.min(studentp)])
+```
+This works for all the students
+lets make the functuin 
+actually lets make numeric first
+```{r}
+x <- student3
+x <- as.numeric(x)
+x[is.na(x)]=0
+mean(x[-which.min(x)])
+```
+
+okay now function 
+```{r}
+# Should we drop the lowest 1 for true 0 for false 
+grade <- function(x,drop) {
+x <- as.numeric(x)
+x[is.na(x)]=0
+if (drop ==1){
+  mean(x[-which.min(x)])}
+  else{
+  mean(x)
+}
+  
+}
+```
+test
+```{r}
+grade(student1,0)
+grade(student2,0)
+grade(student3,0)
+```
+now lets play with this finle
+```{r}
+gradebook <- "https://tinyurl.com/gradeinput"
+scores <- read.csv(gradebook, row.names=1)
+scores
+```
+Cool we have a data set now
+
+We havent used this function yet but APPLY() applies function to our data set... this is cool because it replaces a loop
+
+```{r}
+ans <- apply(scores,MARGIN=1,grade)
+
+```
+**Q2** top scorer 
+```{r}
+which.max(ans)
+```
+**Q3** Which HW was the hardest (lowest score)
+```{r}
+apply(scores,2,grade)
+```
+Well this drops one lowest score oops
+replace NA in grade book 
+```{r}
+mask<-scores
+mask[is.na(mask)]=0
+```
+Now function, I think sum is better than average personally
+
+```{r}
+sumscore<-apply(mask,2,sum)
+which.min(sumscore)
+```
+Homework 2 was the hardest probably.
+
+
+
+
+
+okay we can use the mean
+```{r}
+sumscore<-apply(mask,2,mean)
+which.min(sumscore)
+```
+
+Q4
+```{r}
+cor(mask$hw5,ans)
+```
+Or use apply 
+apply(mask,2,cor)
+```{r}
+corvec<-apply(mask,2,cor,ans)
+which.max(corvec)
+```
+
+
+
+
+
+
