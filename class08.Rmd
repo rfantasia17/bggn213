@@ -1,0 +1,152 @@
+---
+title: "class08"
+author: "R(PID:A59010419"
+date: "10/22/2021"
+output:
+  pdf_document: default
+  html_document: default
+---
+Kmeaans in R is 'kmeans()' function.
+
+```{r setup, include=FALSE}
+tmp <- c(rnorm(30, 3) , rnorm(30,-3))
+
+#hist(tmp)
+data<-cbind(x=tmp, y=rev(tmp))
+plot(data)
+```
+
+tRun kmeans set k to 2 and nstart to 20. Tell kmeans cluster numbah 
+```{r setup, include=FALSE}
+km=kmeans(data,2,nstart=20)
+print(km)
+```
+How many pts per Cluster
+```{r}
+km$size
+```
+What component is the cluster assignment ?
+```{r}
+km$cluster
+```
+Plot the clusters 
+```{r}
+plot(data,col=4)
+plot(data, col=km$cluster)
+points(km$centers,col="blue",pch=15, cex=2)
+```
+Lets approach clustering from a different dirrection!
+Hierarchical 
+Hclust (needs dist)
+```{r}
+hc=hclust(dist(data))
+hc
+```
+
+```{r}
+plot(hc)
+abline(h=7, col='red')
+```
+Now lets sepate our tree
+```{r}
+cutted=cutree(hc,3)
+plot(data, col=cutted)
+
+```
+# Principal Component Analysis (PCA1)
+
+## PCA
+Data: Q1
+```{r}
+url <- "https://tinyurl.com/UK-foods"
+x <- read.csv(url)
+dim(x) #Q1
+```
+```{r}
+rowname(x)<-x[,1]
+x
+
+```
+```{r}
+url <- "https://tinyurl.com/UK-foods"
+x <- read.csv(url, row.names=1)
+x
+```
+
+```{r}
+barplot(as.matrix(x))
+```
+```{r}
+hc=hclust(dist(x))
+hc
+plot(hc)
+```
+```{r}
+barplot(as.matrix(x), beside=T, col=rainbow(nrow(x)))
+```
+```{r}
+pairs(x, col=rainbow(10), pch=16)
+```
+
+Oops should have done this for the transpose not what I did earlier 
+
+```{r}
+pca <- t(x)
+pca<-prcomp(pca)
+summary(pca)
+```
+
+Looks like PCA! Lets get a PCA plot
+```{r}
+# Plot PC1 vs PC2
+plot(pca$x[,1:2]) #pca$x[0,1:2], xlab="PC1", ylab="PC2", xlim=c(-270,500))
+text(pca$x[,1], pca$x[,2], colnames(x))
+```
+We can also examine the PCA "loadings" which may tell us why Northern Ireland is different along the PC1. 
+
+```{r}
+pca$rotation[,1]
+par(mar=c(10, 3, 0.35, 0))
+barplot( pca$rotation[,1], las=2 )
+```
+
+
+```{r}
+url2 <- "https://tinyurl.com/expression-CSV"
+rna.data <- read.csv(url2, row.names=1)
+head(rna.data)
+#im(rna.data)
+```
+Q10
+100 genes 10 columns!
+```{r}
+## Again we have to take the transpose of our data 
+pca <- prcomp(t(rna.data), scale=TRUE)
+ 
+## Simple un polished plot of pc1 and pc2
+plot(pca$x[,1], pca$x[,2], xlab="PC1", ylab="PC2")
+
+```
+```{r}
+summary(pca)
+```
+
+```{r}
+plot(pca, main="Quick scree plot")
+```
+
+```{r}
+
+pca.var <- pca$sdev^2
+
+
+pca.var.per <- round(pca.var/sum(pca.var)*100, 1)
+pca.var.per
+```
+
+```{r}
+plot(pca$x[,1:2])
+text(pca$x[,1:2],labels=colnames(rna.data))
+```
+
+
