@@ -1,152 +1,144 @@
 ---
-title: "class08"
+title: "Class08_miniproject"
 author: "R(PID:A59010419"
-date: "10/22/2021"
-output:
-  pdf_document: default
-  html_document: default
+date: "10/27/2021"
+output: pdf_document
 ---
-Kmeaans in R is 'kmeans()' function.
-
-```{r setup, include=FALSE}
-tmp <- c(rnorm(30, 3) , rnorm(30,-3))
-
-#hist(tmp)
-data<-cbind(x=tmp, y=rev(tmp))
-plot(data)
-```
-
-tRun kmeans set k to 2 and nstart to 20. Tell kmeans cluster numbah 
-```{r setup, include=FALSE}
-km=kmeans(data,2,nstart=20)
-print(km)
-```
-How many pts per Cluster
-```{r}
-km$size
-```
-What component is the cluster assignment ?
-```{r}
-km$cluster
-```
-Plot the clusters 
-```{r}
-plot(data,col=4)
-plot(data, col=km$cluster)
-points(km$centers,col="blue",pch=15, cex=2)
-```
-Lets approach clustering from a different dirrection!
-Hierarchical 
-Hclust (needs dist)
-```{r}
-hc=hclust(dist(data))
-hc
-```
 
 ```{r}
-plot(hc)
-abline(h=7, col='red')
-```
-Now lets sepate our tree
-```{r}
-cutted=cutree(hc,3)
-plot(data, col=cutted)
+# Complete the following code to input the data and store as wisc.df
+fna.data <- "WisconsinCancer.csv"
+wisc.df <- read.csv(fna.data, row.names=1)
+#print(wisc.df)
 
-```
-# Principal Component Analysis (PCA1)
+# We can use -1 here to remove the first column which is the answer 
+wisc.data <- wisc.df[,-1]
+diagnosis<-as.factor(wisc.df$diagnosis)
 
-## PCA
-Data: Q1
-```{r}
-url <- "https://tinyurl.com/UK-foods"
-x <- read.csv(url)
-dim(x) #Q1
-```
-```{r}
-rowname(x)<-x[,1]
-x
+#check out the data 
+dim(wisc.data)
+nrow(wisc.data)
+# Q1. How many observations are in this dataset?
+nrow(wisc.data)
 
+#Q2. How many of the observations have a malignant diagnosis?
+table(diagnosis)
+#Q3. How many variables/features in the data are suffixed with _mean?
+length(grep('_mean$',colnames(wisc.data)))
 ```
 ```{r}
-url <- "https://tinyurl.com/UK-foods"
-x <- read.csv(url, row.names=1)
-x
+colMeans<-colMeans(wisc.data)
+colsd<-apply(wisc.data, c(2),sd)
+
+#PCA on wisc.data 
+wisc.pr <- prcomp(wisc.data,scale=TRUE)
+
+
+summary(wisc.pr)
+#Q4. From your results, what proportion of the original variance is captured by the first principal components (PC1)?
+#0.4427
+#Q5. How many principal components (PCs) are required to describe at least 70% of the original variance in the data?
+# 3PCS 
+#Q6. How many principal components (PCs) are required to describe at least 90% of the original variance in the data?
+#7PCS
 ```
 
 ```{r}
-barplot(as.matrix(x))
-```
-```{r}
-hc=hclust(dist(x))
-hc
-plot(hc)
-```
-```{r}
-barplot(as.matrix(x), beside=T, col=rainbow(nrow(x)))
-```
-```{r}
-pairs(x, col=rainbow(10), pch=16)
-```
+biplot(wisc.pr)
+#Q7. What stands out to you about this plot? Is it easy or difficult to understand? Why?
+#It is impossible to interpret because there are too many labels and its obnoxious.  
 
-Oops should have done this for the transpose not what I did earlier 
+plot(wisc.pr$x[,1:2], col = diagnosis , 
+     xlab = "PC1", ylab = "PC2")
+#Q8. Generate a similar plot for principal components 1 and  What do you notice about these plots?
+plot(wisc.pr$x[,1],wisc.pr$x[,3], col = diagnosis , 
+     xlab = "PC1", ylab = "PC3")
 
-```{r}
-pca <- t(x)
-pca<-prcomp(pca)
-summary(pca)
-```
 
-Looks like PCA! Lets get a PCA plot
-```{r}
-# Plot PC1 vs PC2
-plot(pca$x[,1:2]) #pca$x[0,1:2], xlab="PC1", ylab="PC2", xlim=c(-270,500))
-text(pca$x[,1], pca$x[,2], colnames(x))
-```
-We can also examine the PCA "loadings" which may tell us why Northern Ireland is different along the PC1. 
-
-```{r}
-pca$rotation[,1]
-par(mar=c(10, 3, 0.35, 0))
-barplot( pca$rotation[,1], las=2 )
 ```
 
 
 ```{r}
-url2 <- "https://tinyurl.com/expression-CSV"
-rna.data <- read.csv(url2, row.names=1)
-head(rna.data)
-#im(rna.data)
-```
-Q10
-100 genes 10 columns!
-```{r}
-## Again we have to take the transpose of our data 
-pca <- prcomp(t(rna.data), scale=TRUE)
- 
-## Simple un polished plot of pc1 and pc2
-plot(pca$x[,1], pca$x[,2], xlab="PC1", ylab="PC2")
+# Create a data.frame for ggplot
+df <- as.data.frame(wisc.pr$x)
+df$diagnosis <- diagnosis
 
+# Load the ggplot2 package
+library(ggplot2)
+
+# Make a scatter plot colored by diagnosis
+library(ggplot2)
+ggplot(df) + 
+  aes(x=PC1, y=PC2, col=df$diagnosis) + 
+  geom_point()
 ```
 ```{r}
-summary(pca)
+pr.var <- wisc.pr$sdev^2
+head(pr.var)
+
+# Variance explained by each principal component: pve
+pve <- pr.var /sum(pr.var)
+
+# Plot variance explained for each principal component
+plot(pve, xlab = "Principal Component", 
+     ylab = "Proportion of Variance Explained", 
+     ylim = c(0, 1), type = "o")
 ```
+```{r}
+barplot(pve, ylab = "Precent of Variance Explained",
+     names.arg=paste0("PC",1:length(pve)), las=2, axes = FALSE)
+axis(2, at=pve, labels=round(pve,2)*100 )
+```
+```{r}
+#Q9. For the first principal component, what is the component of the loading vector (i.e. wisc.pr$rotation[,1]) for the feature concave.points_mean?
+print(wisc.pr$rotation[,1])
+
+
+loading=as.factor(wisc.pr$rotation[,1])
+
+loading['concave.points_mean']
+
+#Q10. What is the minimum number of principal components required to explain 80% of the variance of the data
+var<-summary(wisc.pr)
+sum(var$importance[3,]<0.8)
+
+```
+```{r}
+data.scaled <- scale(wisc.data)
+data.dist <- dist(data.scaled)
+wisc.hclust <- hclust(data.dist, method='complete')
+plot(wisc.hclust)
+abline(h=19, col="red", lty=2)
+
+wisc.hclust.clusters <- cutree(wisc.hclust,4)
+table(wisc.hclust.clusters, diagnosis)
+```
+
 
 ```{r}
-plot(pca, main="Quick scree plot")
+wisc.hclust.clusters <- cutree(wisc.hclust,2)
+print(table(wisc.hclust.clusters, diagnosis))
+wisc.hclust.clusters <- cutree(wisc.hclust,3)
+print(table(wisc.hclust.clusters, diagnosis))
+wisc.hclust.clusters <- cutree(wisc.hclust,4)
+print(table(wisc.hclust.clusters, diagnosis))
+wisc.hclust.clusters <- cutree(wisc.hclust,5)
+print(table(wisc.hclust.clusters, diagnosis))
+wisc.hclust.clusters <- cutree(wisc.hclust,6)
+print(table(wisc.hclust.clusters, diagnosis))
+wisc.hclust.clusters <- cutree(wisc.hclust,7)
+print(table(wisc.hclust.clusters, diagnosis))
+wisc.hclust.clusters <- cutree(wisc.hclust,8)
+print(table(wisc.hclust.clusters, diagnosis))
+wisc.hclust.clusters <- cutree(wisc.hclust,9)
+print(table(wisc.hclust.clusters, diagnosis))
+wisc.hclust.clusters <- cutree(wisc.hclust,10)
+print(table(wisc.hclust.clusters, diagnosis))
 ```
-
-```{r}
-
-pca.var <- pca$sdev^2
+Q12. Can you find a better cluster vs diagnoses match by cutting into a different number of clusters between 2 and 10?
+4 and 5 look better.  They have good separation between B and M and they are not a large number of clusters that is artifiaclly clustering the data.
 
 
-pca.var.per <- round(pca.var/sum(pca.var)*100, 1)
-pca.var.per
-```
+Q13. Which method gives your favorite results for the same data.dist dataset? Explain your reasoning.
 
-```{r}
-plot(pca$x[,1:2])
-text(pca$x[,1:2],labels=colnames(rna.data))
-```
-
-
+I prefer the PCA analysis because hierarchical clustering seems less quantitative while PCA tells me how many PCAs represent a percentage of variance in my data and is quantitative. 
