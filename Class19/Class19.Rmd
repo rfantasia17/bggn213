@@ -1,0 +1,74 @@
+---
+title: "Class19"
+author: "R(PID:A59010419"
+date: "12/1/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+data <- read.csv('373531-SampleGenotypes-Homo_sapiens_Variation_Sample_rs8067378.csv')
+
+```
+
+```{r}
+table(data$Genotype..forward.strand.)
+```
+```{r}
+table(data$Genotype..forward.strand.)/nrow(data)
+
+```
+
+```{r}
+table1 <- read.table('rs8067378_ENSG00000172057.6.txt')
+```
+
+Read this file into R and determine the sample size for each genotype and their
+corresponding median expression levels for each of these genotypes.
+
+```{r}
+summary(table1)
+```
+There are 462 genotypes in the data talbe. 
+```{r}
+table(table1$geno)
+```
+
+
+
+```{r}
+boxplot1 <- boxplot(table1$exp~table1$geno,data=table1, main="Gene Expression per Genotype", 
+   xlab="Genotype", ylab="Expression Level")
+```
+```{r}
+boxplot1
+
+```
+
+Based off the stats of the boxplot1 object the medians expression levels are 
+31.24847 25.06486 20.07363 for A|A,A|G, and G|G respectively. And from the table(table1geno) function and the n we found the sample size to be 108 233 121 for A|A,A|G, and G|G respectively. 
+
+
+
+ Generate a boxplot with a box per genotype, what could you infer from the relative
+expression value between A/A and G/G displayed in this plot? Does the SNP effect the
+expression of ORMDL3? 
+Repeat of above table for description of answer.
+```{r}
+boxplot1 <- boxplot(table1$exp~table1$geno,data=table1, main="Gene Expression per Genotype", 
+   xlab="Genotype", ylab="Expression Level")
+```
+A|A 15.42908 26.95022 31.24847 35.95503 49.39612
+G|G 6.67482 16.90256 20.07363 24.45672 33.95602
+
+And above I have taken the values from the Stats for the AA and GG genotype. 
+
+At first glance the AA SNP seems to increase expression levels compared to the GG SNP. This can be seen as an increase in median. Further examination we see the lower quartile for AA is 26.9 and the upper quartile for GG is 24.45. This non overlapping quartile could be taken to say that there is in fact an increase in AA expression compared to GG expression. This would be based on the claim that the middle 50% of the data for AA has higher expression than the middle 50% of the data for GG. Further statistical testing would need to be done to make any further claims. It is clear that some of the data in these two distributions overlap so it may not be a significant difference from other statistical approaches.
+
+
+
+

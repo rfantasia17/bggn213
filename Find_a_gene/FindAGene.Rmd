@@ -1,0 +1,36 @@
+---
+title: "FindAGene"
+author: "R(PID:A59010419"
+date: "11/27/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(bio3d)
+alignment <- read.fasta('muscle-I20211127-202420-0347-16263550-p2m.clw.css.fst', rm.dup = TRUE, to.upper = FALSE, to.dash=TRUE)
+```
+
+
+```{r}
+seqid <- seqidentity(alignment, normalize=TRUE, similarity=FALSE, ncore=1, nseg.scale=1)
+names <- rownames(seqid)
+```
+```{r}
+heatmap(seqid , margins=c(15,10))
+```
+```{r}
+cons <- consensus(alignment)
+
+consid <- seqidentity( rbind(cons$seq, alignment$ali))
+```
+```{r}
+alignment2 <- read.fasta('muscle-I20211203-020612-0957-46420322-p1m.clw.fst', rm.dup = TRUE, to.upper = FALSE, to.dash=TRUE)
+LNovel <- seqidentity(alignment2, normalize=TRUE, similarity=FALSE, ncore=1, nseg.scale=1
+)
+```
+

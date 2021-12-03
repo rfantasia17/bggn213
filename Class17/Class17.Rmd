@@ -1,0 +1,220 @@
+---
+title: "Class17"
+author: "R(PID:A59010419"
+date: "11/24/2021"
+output:
+  pdf_document: 
+    latex_engine: xelatex
+---
+
+
+
+
+Lets read in some COVID-9 Vaccine data 
+
+```{r}
+vax <- read.csv( 'covid19vaccinesbyzipcode_test.csv' )
+head(vax)
+```
+
+Q How many entries do we have?
+```{r}
+nrow(vax)
+```
+
+
+
+Q1. What column details the total number of people fully vaccinated? 
+persons_fully_vaccinated
+Q2. What column details the Zip code tabulation area? 
+zip_code_tabulation_area
+Q3. What is the earliest date in this dataset? 
+2021-01-05
+Q4. What is the latest date in this dataset? 
+2021-11-23
+
+```{r}
+skimr::skim(vax)
+```
+
+Q5. How many numeric columns are in this dataset? 
+9
+Q6. Note that there are “missing values” in the dataset. How many NA values there in the persons_fully_vaccinated column? 
+8355
+Q7. What percent of persons_fully_vaccinated values are missing (to 2 significant figures)? 
+10.07
+Q8. [Optional]: Why might this data be missing?
+```{r}
+8355/82908 
+```
+Notice some of these columns is in the date column:
+Lets use lubridate
+```{r}
+library(lubridate)
+today()
+
+
+```
+How many days since the first entry in the dataset?
+
+```{r}
+vax$as_of_date[1]
+```
+```{r}
+d <- ymd(vax$as_of_date)
+```
+```{r}
+today()-d[1]
+```
+
+Write over data set to have this date format
+
+```{r}
+vax$as_of_date <- ymd(vax$as_of_date)
+
+
+```
+```{r}
+vax$as_of_date[nrow(vax)]
+
+today() - vax$as_of_date[nrow(vax)]
+vax$as_of_date[nrow(vax)] - vax$as_of_date[1]
+```
+Last update 
+How recently 
+How many days does the data set span 
+
+
+
+```{r}
+length(unique(vax$zip_code_tabulation_area))
+```
+
+To work with zip codes we can use zipcoderR
+
+```{r}
+library(zipcodeR)
+geocode_zip('92037')
+zip_distance('92037','92109')
+reverse_zipcode(c('92037', "92109") )
+```
+
+
+Lets focus on San Deigo County 
+```{r}
+library(dplyr)
+
+sd <- filter(vax, county == "San Diego")
+
+nrow(sd)
+```
+
+```{r}
+sd.10 <- filter(vax, county == "San Diego" &
+                age5_plus_population > 10000)
+```
+
+
+```{r}
+length(unique(sd$zip_code_tabulation_area))
+```
+
+Q11. How many distinct zip codes are listed for San Diego County? 
+107
+
+```{r}
+sd$zip_code_tabulation_area[which.max(sd$age12_plus_population)]
+
+```
+
+
+Q12. What San Diego County Zip code area has the largest 12 + Population in this dataset? 
+Hint
+92154
+
+
+Q What is the average vaccination rate of San Diego County
+```{r}
+sd.now <- filter(vax, county == "San Diego", as_of_date == "2021-11-23")
+head(sd.now)
+summary(sd.now$percent_of_population_fully_vaccinated)
+```
+
+
+```{r}
+hist(sd.now$percent_of_population_fully_vaccinated)
+```
+
+
+
+```{r}
+ucsd <- filter(sd.now, zip_code_tabulation_area == "92037")
+ucsd[1,]$age5_plus_population
+```
+Q What is the population of the 92037 zip code area and what is the average vaccination 
+```{r}
+ucsd$percent_of_population_fully_vaccinated
+```
+
+```{r}
+pb <- filter(sd.now, zip_code_tabulation_area == "92109")
+pb$percent_of_population_fully_vaccinated
+```
+
+```{r}
+ucsd2 <- filter(vax, zip_code_tabulation_area == "92037")
+```
+
+
+```{r}
+library(ggplot2)
+ggplot(ucsd2) +
+  aes(ymd(ucsd2$as_of_date),
+      ucsd2$percent_of_population_fully_vaccinated) +
+  geom_point() +
+  geom_line(group=1) +
+  ylim(c(0,1)) +
+  labs(x="date", y="Percent Vaccinated")
+```
+
+```{r}
+vax.36 <- filter(vax, age5_plus_population > 36144 &
+                as_of_date == "2021-11-16")
+summary(vax.36$percent_of_population_fully_vaccinated)
+```
+Mean .6640 
+
+```{r}
+hist(vax.36$percent_of_population_fully_vaccinated)
+```
+
+
+```{r}
+sd.36 <- filter(sd, age5_plus_population > 36144 &
+                as_of_date == "2021-11-16")
+summary(sd.36$percent_of_population_fully_vaccinated)
+```
+
+
+```{r}
+vax.36.all <- filter(vax, age5_plus_population > 36144 )
+length(unique(vax.36.all$zip_code_tabulation_area))
+
+ggplot(vax.36.all) +
+  aes(ymd(vax.36.all$as_of_date),
+      percent_of_population_fully_vaccinated, 
+      group=zip_code_tabulation_area) +
+  geom_line(alpha=0.2) +
+  ylim(c(0,1.0)) +
+  labs(x="Date", y="Precent Vaccinated",
+       title="Vaccination rate across California",
+       subtitle="populations > 36144") + 
+      geom_hline(yintercept = 0.67, color="red")
+
+
+```
+
+
+
+
+
